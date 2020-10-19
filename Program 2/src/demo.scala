@@ -67,47 +67,47 @@ def main(args: Array[String]): Unit = {
         println(stringToPrint)
 
 
-        var start = tokens.length - 2
+        var start = 1
         var lastFlag = flagChar(tokens,';',start)
 
-        stringToPrint = stringToPrint.reverse
+
         ctr = 0
 
         if(lastFlag == -1){
-          lastFlag = 0
+          lastFlag = tokens.length-1
         }
 
         //start bar a0, 0, axis a0, edge a0,a0, fill a0 stop
 
-        var barReversed = "bar <x><y>,<y>".reverse
-        var edgeReversed = "edge <x><y>,<x><y>".reverse
-        var plotReversed = "<plot>".reverse
-        var axisReversed = "axis <x><y>".reverse
-        var fillReversed = "fill <x><y>".reverse
+        var bar = "bar <x><y>,<y>"
+        var edge = "edge <x><y>,<x><y>"
+        var plot = "<plot>"
+        var axis = "axis <x><y>"
+        var fill = "fill <x><y>"
 
         var error = false
       breakable {
         while (true) {
-          var checkNext = lastFlag
-          checkNext += 1
+//          var checkNext = lastFlag
+//          checkNext -= 1
 
-          if (tokens(checkNext) == "bar") {
-            stringToPrint = stringToPrint.replaceFirst(plotReversed, barReversed)
-            println(stringToPrint.reverse)
+          if (tokens(start) == "bar") {
+            stringToPrint = stringToPrint.replaceFirst(plot, bar)
+            println(stringToPrint)
 
-            var barTokens: Array[String] = tokens.slice(checkNext, start + 1)
-            stringToPrint = checkStatement(barTokens,"bar",stringToPrint);
+            var barTokens: Array[String] = tokens.slice(start, lastFlag)
+            stringToPrint = checkStatement(barTokens,"bar",stringToPrint)
             if (stringToPrint == "") {
               println("Statement does not follow grammar")
               error = true
               break
             }
           }
-          else if (tokens(checkNext) == "edge") {
-            stringToPrint = stringToPrint.replaceFirst(plotReversed, edgeReversed)
-            println(stringToPrint.reverse)
+          else if (tokens(start) == "edge") {
+            stringToPrint = stringToPrint.replaceFirst(plot, edge)
+            println(stringToPrint)
 
-            var edgeTokens = tokens.slice(checkNext, start + 1)
+            var edgeTokens = tokens.slice(start, lastFlag)
 
             stringToPrint = checkStatement(edgeTokens,"edge",stringToPrint);
             if (stringToPrint == "") {
@@ -117,11 +117,11 @@ def main(args: Array[String]): Unit = {
             }
           }
 
-          else if (tokens(checkNext) == "axis") {
-            stringToPrint = stringToPrint.replaceFirst(plotReversed, axisReversed)
-            println(stringToPrint.reverse)
+          else if (tokens(start) == "axis") {
+            stringToPrint = stringToPrint.replaceFirst(plot, axis)
+            println(stringToPrint)
 
-            var axisTokens = tokens.slice(checkNext, start + 1)
+            var axisTokens = tokens.slice(start, lastFlag)
 
             stringToPrint = checkStatement(axisTokens,"axis",stringToPrint);
             if (stringToPrint == "") {
@@ -130,11 +130,11 @@ def main(args: Array[String]): Unit = {
               break
             }
           }
-          else if (tokens(checkNext) == "fill") {
-            stringToPrint = stringToPrint.replaceFirst(plotReversed, fillReversed)
-            println(stringToPrint.reverse)
+          else if (tokens(start) == "fill") {
+            stringToPrint = stringToPrint.replaceFirst(plot, fill)
+            println(stringToPrint)
 
-            var fillTokens = tokens.slice(checkNext, start + 1)
+            var fillTokens = tokens.slice(start, lastFlag)
 
             stringToPrint = checkStatement(fillTokens,"fill",stringToPrint);
             if (stringToPrint == "") {
@@ -144,24 +144,22 @@ def main(args: Array[String]): Unit = {
             }
           }
           else {
-            println(tokens(checkNext) + " is not a valid plot")
+            println(tokens(start) + " is not a valid plot")
             error = true
             break
           }
 
-          if (ctr == 1) {
+          if(lastFlag == tokens.length-1){
             break
           }
-
-          if (lastFlag != 0) {
-            start = lastFlag - 1
+          else{
+            start = lastFlag + 1
           }
 
           lastFlag = flagChar(tokens, ';', start)
 
-          if (lastFlag == -1) {
-            lastFlag = 0
-            ctr += 1
+          if(lastFlag == -1){
+            lastFlag = tokens.length - 1;
           }
         }
       }
@@ -182,26 +180,26 @@ def main(args: Array[String]): Unit = {
   def flagChar(tokens: Array[String], flag: Char, start: Int): Int ={
     var i = start
 
-      while(i!=0) {
+      while(i!=tokens.length) {
         if (tokens(i) == flag.toString) {
           return i
         }
-        i -= 1
+        i += 1
       }
    -1
   }
 
   def checkStatement(tokens: Array[String], statementType: String, stringToPrint: String):String = {
-    var start = tokens.length-1
+    var start = 0
     var newPrint = stringToPrint
     if(statementType == "bar"){
       if(tokens.length == 4){
-        while(start>0){
+        while(start<tokens.length){
           if (start == 3) {
             tokens(start) match {
               case "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" => {
-                newPrint = newPrint.replaceFirst(">y<",tokens(start))
-                println(newPrint.reverse)
+                newPrint = newPrint.replaceFirst("<y>",tokens(start))
+                println(newPrint)
               }
               case _ => {
                 println(tokens(start) + " is not a valid y")
@@ -216,28 +214,29 @@ def main(args: Array[String]): Unit = {
             }
           }
           else if(start == 1){
+            tokens(start)(0) match {
+              case 'a'|'b'|'c'|'d'|'e'|'f'|'g'|'h'|'i'|'j' => {
+                newPrint = newPrint.replaceFirst("<x>",tokens(start)(0).toString)
+                println(newPrint)
+              }
+              case _ =>{
+                println(tokens(start)(0).toString +" is not a valid x")
+                return ""
+              }
+            }
             tokens(start)(1) match {
               case '0'|'1'|'2'|'3'|'4'|'5'|'6'|'7'|'8'|'9' => {
-                newPrint = newPrint.replaceFirst(">y<",tokens(start)(1).toString)
-                println(newPrint.reverse)
+                newPrint = newPrint.replaceFirst("<y>",tokens(start)(1).toString)
+                println(newPrint)
               }
                case _ =>{
                   println(tokens(start)(1).toString +" is not a valid y")
                   return ""
                 }
             }
-            tokens(start)(0) match {
-              case 'a'|'b'|'c'|'d'|'e'|'f'|'g'|'h'|'i'|'j' => {
-                newPrint = newPrint.replaceFirst(">x<",tokens(start)(0).toString)
-                println(newPrint.reverse)
-              }
-              case _ =>{
-                  println(tokens(start)(0).toString +" is not a valid x")
-                  return ""
-                }
-            }
+
           }
-          start-=1
+          start+=1
         }
       }
       else{
@@ -253,28 +252,29 @@ def main(args: Array[String]): Unit = {
     }
     else if(statementType == "edge"){
       if(tokens.length == 4){
-        while(start>0){
+        while(start<tokens.length){
           if (start == 3){
+            tokens(start)(0) match {
+              case 'a'|'b'|'c'|'d'|'e'|'f'|'g'|'h'|'i'|'j' => {
+                newPrint = newPrint.replaceFirst("<x>",tokens(start)(0).toString)
+                println(newPrint)
+              }
+              case _ =>{
+                println(tokens(start)(0).toString +" is not a valid x")
+                return ""
+              }
+            }
             tokens(start)(1) match {
               case '0'|'1'|'2'|'3'|'4'|'5'|'6'|'7'|'8'|'9' => {
-                newPrint = newPrint.replaceFirst(">y<",tokens(start)(1).toString)
-                println(newPrint.reverse)
+                newPrint = newPrint.replaceFirst("<y>",tokens(start)(1).toString)
+                println(newPrint)
               }
                case _ =>{
                   println(tokens(start)(1).toString +" is not a valid y")
                   return ""
                 }
             }
-            tokens(start)(0) match {
-              case 'a'|'b'|'c'|'d'|'e'|'f'|'g'|'h'|'i'|'j' => {
-                newPrint = newPrint.replaceFirst(">x<",tokens(start)(0).toString)
-                println(newPrint.reverse)
-              }
-               case _ =>{
-                  println(tokens(start)(0).toString +" is not a valid x")
-                  return ""
-                }
-            }
+
           }
           else if(start == 2){
             if(tokens(start) != ","){
@@ -283,28 +283,29 @@ def main(args: Array[String]): Unit = {
             }
           }
           else if(start == 1){
+            tokens(start)(0) match {
+              case 'a'|'b'|'c'|'d'|'e'|'f'|'g'|'h'|'i'|'j' => {
+                newPrint = newPrint.replaceFirst("<x>",tokens(start)(0).toString)
+                println(newPrint)
+              }
+              case _ =>{
+                println(tokens(start)(0).toString +" is not a valid x")
+                return ""
+              }
+            }
             tokens(start)(1) match {
               case '0'|'1'|'2'|'3'|'4'|'5'|'6'|'7'|'8'|'9' => {
-                newPrint = newPrint.replaceFirst(">y<",tokens(start)(1).toString)
-                println(newPrint.reverse)
+                newPrint = newPrint.replaceFirst("<y>",tokens(start)(1).toString)
+                println(newPrint)
               }
                case _ =>{
                   println(tokens(start)(1).toString +" is not a valid y")
                   return ""
                 }
             }
-            tokens(start)(0) match {
-              case 'a'|'b'|'c'|'d'|'e'|'f'|'g'|'h'|'i'|'j' => {
-                newPrint = newPrint.replaceFirst(">x<",tokens(start)(0).toString)
-                println(newPrint.reverse)
-              }
-               case _ =>{
-                  println(tokens(start)(0).toString +" is not a valid x")
-                  return ""
-                }
-            }
+
           }
-          start-=1
+          start+=1
         }
       }
       else{
@@ -320,26 +321,27 @@ def main(args: Array[String]): Unit = {
     }
     else if(statementType == "axis") {
       if (tokens.length == 2) {
+        tokens(start)(0) match {
+          case 'a'|'b'|'c'|'d'|'e'|'f'|'g'|'h'|'i'|'j' => {
+            newPrint = newPrint.replaceFirst("<x>",tokens(start)(0).toString)
+            println(newPrint)
+          }
+          case _ =>{
+            println(tokens(start)(0).toString +" is not a valid x")
+            return ""
+          }
+        }
         tokens(start)(1) match {
           case '0'|'1'|'2'|'3'|'4'|'5'|'6'|'7'|'8'|'9' => {
-            newPrint = newPrint.replaceFirst(">y<",tokens(start)(1).toString)
-            println(newPrint.reverse)
+            newPrint = newPrint.replaceFirst("<y>",tokens(start)(1).toString)
+            println(newPrint)
           }
            case _ =>{
               println(tokens(start)(1).toString +" is not a valid y")
               return ""
             }
         }
-        tokens(start)(0) match {
-          case 'a'|'b'|'c'|'d'|'e'|'f'|'g'|'h'|'i'|'j' => {
-            newPrint = newPrint.replaceFirst(">x<",tokens(start)(0).toString)
-            println(newPrint.reverse)
-          }
-          case _ =>{
-              println(tokens(start)(0).toString +" is not a valid x")
-              return ""
-            }
-        }
+
       }
       else{
         if(tokens.length < 2){
@@ -354,26 +356,27 @@ def main(args: Array[String]): Unit = {
     }
     else if(statementType == "fill") {
       if (tokens.length == 2) {
+        tokens(start)(0) match {
+          case 'a'|'b'|'c'|'d'|'e'|'f'|'g'|'h'|'i'|'j' => {
+            newPrint = newPrint.replaceFirst("<x>",tokens(start)(0).toString)
+            println(newPrint)
+          }
+          case _ =>{
+            println(tokens(start)(0).toString +" is not a valid x")
+            return ""
+          }
+        }
         tokens(start)(1) match {
           case '0'|'1'|'2'|'3'|'4'|'5'|'6'|'7'|'8'|'9' => {
-            newPrint = newPrint.replaceFirst(">y<",tokens(start)(1).toString)
-            println(newPrint.reverse)
+            newPrint = newPrint.replaceFirst("<y>",tokens(start)(1).toString)
+            println(newPrint)
           }
            case _ =>{
               println(tokens(start)(1).toString +" is not a valid y")
               return ""
             }
         }
-        tokens(start)(0) match {
-          case 'a'|'b'|'c'|'d'|'e'|'f'|'g'|'h'|'i'|'j' => {
-            newPrint = newPrint.replaceFirst(">x<",tokens(start)(0).toString)
-            println(newPrint.reverse)
-          }
-           case _ =>{
-              println(tokens(start)(0).toString +" is not a valid x")
-              return ""
-            }
-        }
+
       }
       else{
         if(tokens.length < 2){
