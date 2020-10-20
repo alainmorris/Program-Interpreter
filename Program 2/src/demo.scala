@@ -25,7 +25,7 @@ def main(args: Array[String]): Unit = {
         var userInputv4 = userInputv3.replace(";","~;~");
         var tokens = userInputv4.split("[~ ]+")
 
-        if (rightmostDerivation(tokens) == 0){
+        if (leftmostDerivation(tokens) == 0){
           printParseTree(tokens)
         }
 
@@ -36,7 +36,7 @@ def main(args: Array[String]): Unit = {
 
 
 
-  def rightmostDerivation(tokens: Array[String]): Int ={
+  def leftmostDerivation(tokens: Array[String]): Int ={
       var stringToPrint: String = ""
       if(tokens(tokens.length - 1)!="stop"){
         var symbol: String = tokens(tokens.length - 1)
@@ -95,7 +95,7 @@ def main(args: Array[String]): Unit = {
             stringToPrint = stringToPrint.replaceFirst(plot, bar)
             println(stringToPrint)
 
-            var barTokens: Array[String] = tokens.slice(start, lastFlag)
+            var barTokens: Array[String] = tokens.slice(start+1, lastFlag)
             stringToPrint = checkStatement(barTokens,"bar",stringToPrint)
             if (stringToPrint == "") {
               println("Statement does not follow grammar")
@@ -107,7 +107,7 @@ def main(args: Array[String]): Unit = {
             stringToPrint = stringToPrint.replaceFirst(plot, edge)
             println(stringToPrint)
 
-            var edgeTokens = tokens.slice(start, lastFlag)
+            var edgeTokens = tokens.slice(start+1, lastFlag)
 
             stringToPrint = checkStatement(edgeTokens,"edge",stringToPrint);
             if (stringToPrint == "") {
@@ -121,7 +121,7 @@ def main(args: Array[String]): Unit = {
             stringToPrint = stringToPrint.replaceFirst(plot, axis)
             println(stringToPrint)
 
-            var axisTokens = tokens.slice(start, lastFlag)
+            var axisTokens = tokens.slice(start+1, lastFlag)
 
             stringToPrint = checkStatement(axisTokens,"axis",stringToPrint);
             if (stringToPrint == "") {
@@ -134,7 +134,7 @@ def main(args: Array[String]): Unit = {
             stringToPrint = stringToPrint.replaceFirst(plot, fill)
             println(stringToPrint)
 
-            var fillTokens = tokens.slice(start, lastFlag)
+            var fillTokens = tokens.slice(start+1, lastFlag)
 
             stringToPrint = checkStatement(fillTokens,"fill",stringToPrint);
             if (stringToPrint == "") {
@@ -193,9 +193,9 @@ def main(args: Array[String]): Unit = {
     var start = 0
     var newPrint = stringToPrint
     if(statementType == "bar"){
-      if(tokens.length == 4){
+      if(tokens.length == 3){
         while(start<tokens.length){
-          if (start == 3) {
+          if (start == 2) {
             tokens(start) match {
               case "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" => {
                 newPrint = newPrint.replaceFirst("<y>",tokens(start))
@@ -207,13 +207,13 @@ def main(args: Array[String]): Unit = {
               }
             }
           }
-          else if(start == 2){
+          else if(start == 1){
             if(tokens(start) != ","){
               println(tokens(start)+" is not a comma")
               return ""
             }
           }
-          else if(start == 1){
+          else if(start == 0){
             tokens(start)(0) match {
               case 'a'|'b'|'c'|'d'|'e'|'f'|'g'|'h'|'i'|'j' => {
                 newPrint = newPrint.replaceFirst("<x>",tokens(start)(0).toString)
@@ -240,7 +240,7 @@ def main(args: Array[String]): Unit = {
         }
       }
       else{
-        if(tokens.length < 4) {
+        if(tokens.length < 3) {
           println("Not enough coordinates to plot bar")
           return ""
         }
@@ -251,9 +251,9 @@ def main(args: Array[String]): Unit = {
       }
     }
     else if(statementType == "edge"){
-      if(tokens.length == 4){
+      if(tokens.length == 3){
         while(start<tokens.length){
-          if (start == 3){
+          if (start == 2){
             tokens(start)(0) match {
               case 'a'|'b'|'c'|'d'|'e'|'f'|'g'|'h'|'i'|'j' => {
                 newPrint = newPrint.replaceFirst("<x>",tokens(start)(0).toString)
@@ -276,13 +276,13 @@ def main(args: Array[String]): Unit = {
             }
 
           }
-          else if(start == 2){
+          else if(start == 1){
             if(tokens(start) != ","){
               println(tokens(start)+" is not a comma")
               return ""
             }
           }
-          else if(start == 1){
+          else if(start == 0){
             tokens(start)(0) match {
               case 'a'|'b'|'c'|'d'|'e'|'f'|'g'|'h'|'i'|'j' => {
                 newPrint = newPrint.replaceFirst("<x>",tokens(start)(0).toString)
@@ -309,7 +309,7 @@ def main(args: Array[String]): Unit = {
         }
       }
       else{
-        if(tokens.length < 4){
+        if(tokens.length < 3){
           println("Not enough coordinates to plot edge")
           return ""
         }
@@ -320,7 +320,7 @@ def main(args: Array[String]): Unit = {
       }
     }
     else if(statementType == "axis") {
-      if (tokens.length == 2) {
+      if (tokens.length == 1) {
         tokens(start)(0) match {
           case 'a'|'b'|'c'|'d'|'e'|'f'|'g'|'h'|'i'|'j' => {
             newPrint = newPrint.replaceFirst("<x>",tokens(start)(0).toString)
@@ -344,7 +344,7 @@ def main(args: Array[String]): Unit = {
 
       }
       else{
-        if(tokens.length < 2){
+        if(tokens.length < 1){
           println("Not enough coordinates to plot axis")
           return ""
         }
@@ -355,10 +355,10 @@ def main(args: Array[String]): Unit = {
       }
     }
     else if(statementType == "fill") {
-      if (tokens.length == 2) {
+      if (tokens.length == 1) {
         tokens(start)(0) match {
           case 'a'|'b'|'c'|'d'|'e'|'f'|'g'|'h'|'i'|'j' => {
-            newPrint = newPrint.replaceFirst("<x>",tokens(start)(0).toString)
+            newPrint = newPrint.replaceFirst("<x>", tokens(start)(0).toString)
             println(newPrint)
           }
           case _ =>{
@@ -379,7 +379,7 @@ def main(args: Array[String]): Unit = {
 
       }
       else{
-        if(tokens.length < 2){
+        if(tokens.length < 1){
           println("Not enough coordinates to plot axis")
           return ""
         }
